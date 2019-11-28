@@ -162,6 +162,19 @@ If a principal argument is specified, it is used as an explicit realm name for
 anonymous pkinit even without an
 .Li @
 prefix.
+.It Li delegate-destination-tgt = Va boolean
+When forwarding credentials to a remote host, forward a TGT for the
+realm of the destination host rather than a TGT for the user's realm.
+This is useful when hosts in the remote realm should not or cannot
+(e.g. firewalled from user realm's KDC) obtain tickets for services
+in the user's realm. When the user's realm and the host's realm are
+the same, this parameter has no effect.  The setting can be applied
+to a single realm as follows:
+.Bd -literal -offset indent
+EXAMPLE.COM = {
+	delegate-destination-tgt = true
+}
+.Ed
 .El
 .It Li [libdefaults]
 .Bl -tag -width "xxx" -offset indent
@@ -219,6 +232,16 @@ See the TOKEN EXPANSION section.
 Use DNS SRV records to lookup KDC services location.
 .It Li dns_lookup_realm = Va boolean
 Use DNS TXT records to lookup domain to realm mappings.
+.It Li enforce_ok_as_delegate = Va boolean
+If this flag to true, GSSAPI credential delegation will be
+disabled when the 
+.Ar ok-as-delegate
+flag is not set in the service ticket.
+If this flag is false, the 
+.Ar ok-as-delegate
+ticket flag is only enforced when an application specifically
+requests enforcement.
+The default value is false.
 .It Li kdc_timesync = Va boolean
 Try to keep track of the time differential between the local machine
 and the KDC, and then compensate for that when issuing requests.
@@ -823,7 +846,30 @@ The name of the service.
 .It principal-host-name
 The name of the host.
 .El
+.It Li enable_derived_keys = Va boolean
+Enable the use of derived key namespaces.
+When enabled, principals of the form
+.Pp
+.Ar WELLKNOWN/DERIVED-KEY/<alg>/<namespace>@REALM
+.Pp
+match any request of the form:
+.Ar */*.<namespace>@REALM .
+The keys are derived from the keys in the database and
+the name of the requested principal via the algorithm
+specified by
+.Ar <alg> .
+Currently, only
+.Ar KRB5-CRYPTO-PRFPLUS
+which is implemented by the function
+.Fn krb5_crypto_prfplus .
+.It Li derived_keys_ndots = Va Integer
+The minimum number of dots in a name matched via
+derived key namespaces.
+.It Li derived_keys_maxdots = Va Integer
+The maximim number of dots in a name matched via
+derived key namespaces.
 .El
+.Pp
 The 
 .Li kx509 ,
 .Li kx509_template ,

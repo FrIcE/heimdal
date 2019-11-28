@@ -102,6 +102,30 @@ init_context_once(void *ignored)
 }
 
 /**
+ * Return a cookie identifying this instance of a library.
+ *
+ * Inputs:
+ *
+ * @context     A krb5_context
+ * @module      Our library name or a library we depend on
+ *
+ * Outputs:     The instance cookie
+ *
+ * @ingroup     krb5_support
+ */
+
+HX509_LIB_FUNCTION uintptr_t HX509_LIB_CALL
+hx509_get_instance(const char *libname)
+{
+    static const char *instance = "libhx509";
+
+    if (strcmp(libname, "hx509") == 0)
+        return (uintptr_t)instance;
+
+    return 0;
+}
+
+/**
  * Creates a hx509 context that most functions in the library
  * uses. The context is only allowed to be used by one thread at each
  * moment. Free the context with hx509_context_free().
@@ -2955,12 +2979,21 @@ hx509_query_match_expr(hx509_context context, hx509_query *q, const char *expr)
 
     if (expr == NULL) {
 	q->match &= ~HX509_QUERY_MATCH_EXPR;
-    } else {
-	q->expr = _hx509_expr_parse(expr);
-	if (q->expr)
-	    q->match |= HX509_QUERY_MATCH_EXPR;
+        return 0;
     }
 
+    q->expr = _hx509_expr_parse(expr);
+    if (q->expr == NULL) {
+        const char *reason = _hx509_expr_parse_error();
+
+        hx509_set_error_string(context, 0, EINVAL,
+                               "Invalid certificate query match expression: "
+                               "%s (%s)", expr,
+                               reason ? reason : "syntax error");
+        return EINVAL;
+    }
+
+    q->match |= HX509_QUERY_MATCH_EXPR;
     return 0;
 }
 

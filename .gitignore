@@ -16,6 +16,7 @@ Makefile
 Makefile.in
 rs_state.ini
 asn1_*.[cx]
+tags
 !/lib/asn1/asn1_gen.c
 !/lib/asn1/asn1_print.c
 !/lib/krb5/asn1_glue.c
@@ -27,6 +28,7 @@ asn1_*.[cx]
 *_asn1-template.c
 *_asn1-template.x
 *_asn1_files
+*_asn1_oids.x
 *_err.[ch]
 !/lib/com_err/com_err.[ch]
 *-commands.[ch]
@@ -58,7 +60,6 @@ asn1_*.[cx]
 /setupbuild.cmd
 /stage1.diff
 /stage2.diff
-/tags
 /test-driver
 /ylwrap
 
@@ -382,6 +383,7 @@ asn1_*.[cx]
 /lib/roken/strpftime-test
 /lib/roken/test-auxval
 /lib/roken/test-detach
+/lib/roken/test-getuserinfo
 /lib/roken/test-readenv
 /lib/roken/tsearch-test
 /lib/roken/vis.h
@@ -452,9 +454,9 @@ asn1_*.[cx]
 /tests/gss/current-db.db
 /tests/gss/foopassword
 /tests/gss/krb5.conf
-/tests/gss/krb5ccfile
-/tests/gss/krb5ccfile2
-/tests/gss/krb5ccfile-ds
+/tests/gss/krb5ccfile*
+/tests/gss/krb5ccfile2*
+/tests/gss/krb5ccfile-ds*
 /tests/gss/server.keytab
 /tests/gss/tempfile
 /tests/java/KerberosInit$1.class
@@ -466,10 +468,12 @@ asn1_*.[cx]
 /tests/java/jgssapi_server.class
 /tests/java/server.keytab
 /tests/java/krb5.conf
-/tests/kdc/acache.krb5
+/tests/kdc/acache.krb5*
 /tests/kdc/barpassword
 /tests/kdc/ca.crt
-/tests/kdc/cache.krb5
+/tests/kdc/cache.krb5*
+/tests/kdc/cache1.krb5*
+/tests/kdc/cache2.krb5*
 /tests/kdc/cdigest-reply
 /tests/kdc/check-authz
 /tests/kdc/check-canon
@@ -512,6 +516,8 @@ asn1_*.[cx]
 /tests/kdc/krb5.conf
 /tests/kdc/krb5-cc.conf
 /tests/kdc/krb5.conf.keys
+/tests/kdc/kx509-template.crt
+/tests/kdc/kx509.pem
 /tests/kdc/localname
 /tests/kdc/notfoopassword
 /tests/kdc/o2cache.krb5
@@ -532,6 +538,7 @@ asn1_*.[cx]
 /tests/ldap/check-ldap
 /tests/ldap/krb5.conf
 /tests/ldap/slapd-init
+/tests/plugin/cache.krb5*
 /tests/plugin/check-pac
 /tests/plugin/current-db.db
 /tests/plugin/foopassword

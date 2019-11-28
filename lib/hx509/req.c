@@ -560,7 +560,7 @@ hx509_request_get_exts(hx509_context context,
     exts_der->data = NULL;
     exts_der->length = 0;
     ret = get_exts(context, req, &exts);
-    if (ret == 0 && exts_der->data && exts_der->length)
+    if (ret == 0 && exts.len /* Extensions has a min size constraint of 1 */)
         ASN1_MALLOC_ENCODE(Extensions, exts_der->data, exts_der->length,
                            &exts, &size, ret);
     free_Extensions(&exts);
@@ -904,7 +904,7 @@ hx509_request_get_eku(hx509_context context,
     *out = NULL;
     if (*cursor < 0)
         return 0;
-    i = (size_t)cursor;
+    i = (size_t)*cursor;
     if (i >= req->eku.len)
         return 0; /* XXX */
     if (i + 1 < req->eku.len)

@@ -58,7 +58,7 @@ log_princ(krb5_context context, krb5_kdc_configuration *config, int lvl,
 
     ret = krb5_unparse_name(context, princ, &princstr);
     if (ret) {
-	kdc_log(context, config, 0, "log_princ: ENOMEM");
+	kdc_log(context, config, 1, "log_princ: ENOMEM");
 	return;
     }
     kdc_log(context, config, lvl, fmt, princstr);
@@ -121,7 +121,7 @@ _derive_the_keys(krb5_context context, krb5_kdc_configuration *config,
 bail:
     if (ret) {
 	const char *msg = krb5_get_error_message(context, ret);
-	kdc_log(context, config, 0, "%s: %s", errmsg, msg);
+	kdc_log(context, config, 1, "%s: %s", errmsg, msg);
 	krb5_free_error_message(context, msg);
     }
     if (crypto)
@@ -142,8 +142,9 @@ _fetch_it(krb5_context context, krb5_kdc_configuration *config, HDB *db,
     char *tmp;
     const char *realm = NULL;
     int is_derived_key = 0;
-    size_t ndots = 0;
     size_t hdots;
+    size_t ndots = 0;
+    size_t maxdots = -1;
 
     flags |= HDB_F_DECRYPT;
 
@@ -167,6 +168,7 @@ _fetch_it(krb5_context context, krb5_kdc_configuration *config, HDB *db,
 	    }
 
 	    ndots = config->derived_keys_ndots;
+	    maxdots = config->derived_keys_maxdots;
 
 	    for (hdots = 0, tmp = host; tmp && *tmp; tmp++)
 		if (*tmp == '.')
@@ -192,6 +194,13 @@ _fetch_it(krb5_context context, krb5_kdc_configuration *config, HDB *db,
 	if (!tmp || !*tmp || hdots < ndots)
 	    break;
 
+	while (maxdots > 0 && hdots > maxdots) {
+		tmp = strchr(tmp, '.');
+		/* tmp != NULL because maxdots > 0 */
+		tmp++;
+		hdots--;
+	}
+
 	is_derived_key = 1;
 	krb5_free_principal(context, tmpprinc);
 	krb5_build_principal(context, &tmpprinc, strlen(realm), realm,
@@ -209,6 +218,8 @@ _fetch_it(krb5_context context, krb5_kdc_configuration *config, HDB *db,
 	log_princ(context, config, 7, "    for %s", princ);
 	log_princ(context, config, 7, "    from %s", tmpprinc);
 	_derive_the_keys(context, config, princ, kvno, ent);
+	/* the next function frees the target */
+	copy_Principal(princ, ent->entry.principal);
     }
 
     free(host);

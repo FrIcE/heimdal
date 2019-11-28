@@ -155,6 +155,7 @@ id-at-name			OBJECT IDENTIFIER ::= { id-x520-at 41 }
 id-at-givenName			OBJECT IDENTIFIER ::= { id-x520-at 42 }
 id-at-initials			OBJECT IDENTIFIER ::= { id-x520-at 43 }
 id-at-generationQualifier	OBJECT IDENTIFIER ::= { id-x520-at 44 }
+id-at-dnQualifier               OBJECT IDENTIFIER ::= { id-x520-at 46 }
 id-at-pseudonym			OBJECT IDENTIFIER ::= { id-x520-at 65 }
 -- RFC 2247
 id-Userid		      	OBJECT IDENTIFIER ::=
@@ -364,9 +365,11 @@ id-x509-ce-subjectDirectoryAttributes OBJECT IDENTIFIER ::=  { id-x509-ce 9 }
 id-x509-ce-policyConstraints OBJECT IDENTIFIER ::=  { id-x509-ce 36 }
 
 id-x509-ce-extKeyUsage OBJECT IDENTIFIER ::= { id-x509-ce 37}
+id-x509-ce-anyExtendedKeyUsage OBJECT IDENTIFIER ::= { id-x509-ce-extKeyUsage 0 }
 
 ExtKeyUsage ::= SEQUENCE OF OBJECT IDENTIFIER
 
+id-x509-ce-cRLReasons OBJECT IDENTIFIER ::= { id-x509-ce 21 }
 id-x509-ce-cRLDistributionPoints OBJECT IDENTIFIER ::=  { id-x509-ce 31 }
 id-x509-ce-deltaCRLIndicator OBJECT IDENTIFIER ::= { id-x509-ce 27 }
 id-x509-ce-issuingDistributionPoint OBJECT IDENTIFIER ::= { id-x509-ce 28 }
@@ -525,12 +528,42 @@ id-pkix-on OBJECT IDENTIFIER ::= { id-pkix 8 }
 id-pkix-on-xmppAddr OBJECT IDENTIFIER ::= { id-pkix-on 5 }
 id-pkix-on-dnsSRV OBJECT IDENTIFIER ::= { id-pkix-on 7 }
 
+-- EKUs
 id-pkix-kp OBJECT IDENTIFIER ::= { id-pkix 3 }
 id-pkix-kp-serverAuth OBJECT IDENTIFIER ::= { id-pkix-kp 1 }
 id-pkix-kp-clientAuth OBJECT IDENTIFIER ::= { id-pkix-kp 2 }
+id-pkix-kp-codeSigning OBJECT IDENTIFIER ::= { id-pkix-kp 3 }
 id-pkix-kp-emailProtection OBJECT IDENTIFIER ::= { id-pkix-kp 4 }
+id-pkix-kp-ipsecEndSystem OBJECT IDENTIFIER ::= { id-pkix-kp 5 }
+id-pkix-kp-ipsecTunnel OBJECT IDENTIFIER ::= { id-pkix-kp 6 }
+id-pkix-kp-ipsecUser OBJECT IDENTIFIER ::= { id-pkix-kp 7 }
 id-pkix-kp-timeStamping OBJECT IDENTIFIER ::= { id-pkix-kp 8 }
 id-pkix-kp-OCSPSigning OBJECT IDENTIFIER ::= { id-pkix-kp 9 }
+-- The following are taken from RFC7299 and others
+id-pkix-kp-DVCS OBJECT IDENTIFIER ::= { id-pkix-kp 10 }
+id-pkix-kp-ipsecIKE OBJECT IDENTIFIER ::= { id-pkix-kp 17 }
+id-pkix-kp-capwapAC OBJECT IDENTIFIER ::= { id-pkix-kp 18 }
+id-pkix-kp-capwapWTP OBJECT IDENTIFIER ::= { id-pkix-kp 19 }
+id-pkix-kp-sipDomain OBJECT IDENTIFIER ::= { id-pkix-kp 20 }        -- RFC5924
+id-pkix-kp-secureShellClient OBJECT IDENTIFIER ::= { id-pkix-kp 21 }
+id-pkix-kp-secureShellServer OBJECT IDENTIFIER ::= { id-pkix-kp 22 }
+id-pkix-kp-sendRouter OBJECT IDENTIFIER ::= { id-pkix-kp 23 }
+id-pkix-kp-sendProxiedRouter OBJECT IDENTIFIER ::= { id-pkix-kp 24 }
+id-pkix-kp-sendOwner OBJECT IDENTIFIER ::= { id-pkix-kp 25 }
+id-pkix-kp-sendProxiedOwner OBJECT IDENTIFIER ::= { id-pkix-kp 26 }
+id-pkix-kp-cmcCA OBJECT IDENTIFIER ::= { id-pkix-kp 27 }            -- RFC6402
+id-pkix-kp-cmcRA OBJECT IDENTIFIER ::= { id-pkix-kp 28 }            -- RFC6402
+id-pkix-kp-cmcArchive OBJECT IDENTIFIER ::= { id-pkix-kp 29 }       -- RFC6402
+id-pkix-kp-bgpsec-router OBJECT IDENTIFIER ::= { id-pkix-kp 30 }    -- RFC8209
+-- The following are MSFT EKUs taken from OpenSSL
+id-msft OBJECT IDENTIFIER ::= { 1 3 6 1 4 1 311 }
+id-msft-kp-msCodeInd OBJECT IDENTIFIER ::= { id-msft 2 1 21 }
+id-msft-kp-msCodeCom OBJECT IDENTIFIER ::= { id-msft 2 1 22 }
+id-msft-kp-msCTLSign OBJECT IDENTIFIER ::= { id-msft 10 3 1 }
+id-msft-kp-msSGC OBJECT IDENTIFIER ::= { id-msft 10 3 3 }
+id-msft-kp-msEFS OBJECT IDENTIFIER ::= { id-msft 10 3 4 }
+id-msft-kp-msSmartcardLogin OBJECT IDENTIFIER ::= { id-msft 20 2 2 }
+id-msft-kp-msUPN OBJECT IDENTIFIER ::= { id-msft 20 2 3 }
 
 id-pkix-pe OBJECT IDENTIFIER ::= { id-pkix 1 }
 
@@ -546,6 +579,11 @@ AuthorityInfoAccessSyntax ::= SEQUENCE SIZE (1..MAX) OF AccessDescription
 -- RFC 3820 Proxy Certificate Profile
 
 id-pkix-pe-proxyCertInfo OBJECT IDENTIFIER ::= { id-pkix-pe 14 }
+
+id-pkix-pe-subjectInfoAccess OBJECT IDENTIFIER ::= { id-pkix-pe 11 }
+
+SubjectInfoAccessSyntax  ::=
+       SEQUENCE SIZE (1..MAX) OF AccessDescription
 
 id-pkix-ppl  OBJECT IDENTIFIER ::= { id-pkix 21 }
 
@@ -579,8 +617,9 @@ id-netscape-cert-comment OBJECT IDENTIFIER ::= { id-netscape 1 13 }
 id-ms-cert-enroll-domaincontroller OBJECT IDENTIFIER ::=
     { 1 3 6 1 4 1 311 20 2 }
 
-id-ms-client-authentication OBJECT IDENTIFIER ::=
- { 1 3 6 1 5 5 7 3 2 }
+-- This is a duplicate of id-pkix-kp-clientAuth
+--  id-ms-client-authentication OBJECT IDENTIFIER ::=
+--  { 1 3 6 1 5 5 7 3 2 }
 
 -- DER:1e:20:00:44:00:6f:00:6d:00:61:00:69:00:6e:00:43:00:6f:00:6e:00:74:00:72:00:6f:00:6c:00:6c:00:65:00:72
 
@@ -623,5 +662,19 @@ ub-surname-length INTEGER ::= 40
 ub-terminal-id-length INTEGER ::= 24
 ub-unformatted-address-length INTEGER ::= 180
 ub-x121-address-length INTEGER ::= 16
+
+-- Misc OIDs from RFC5280.  We should add related types as well.
+
+-- Policy qualifiers
+id-pkix-qt OBJECT IDENTIFIER ::= { id-pkix 2 }
+id-pkix-qt-cps      OBJECT IDENTIFIER ::=  { id-pkix-qt 1 }
+id-pkix-qt-unotice  OBJECT IDENTIFIER ::=  { id-pkix-qt 2 }
+
+-- Access description
+id-pkix-ad OBJECT IDENTIFIER ::= { id-pkix 48 }
+id-pkix-ad-ocsp         OBJECT IDENTIFIER ::= { id-pkix-ad 1 }
+id-pkix-ad-caIssuers    OBJECT IDENTIFIER ::= { id-pkix-ad 2 }
+id-pkix-ad-timeStamping OBJECT IDENTIFIER ::= { id-pkix-ad 3 }
+id-pkix-ad-caRepository OBJECT IDENTIFIER ::= { id-pkix-ad 5 }
 
 END
